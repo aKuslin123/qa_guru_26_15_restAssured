@@ -1,0 +1,63 @@
+plugins {
+    id 'java-library'
+    id 'io.qameta.allure' version '2.11.2'
+}
+
+repositories {
+    mavenCentral()
+}
+
+allure {
+    report {
+        version.set("2.27.0") //версия Allure Report (https://github.com/allure-framework/allure2)
+    }
+    adapter {  // отвечает за появление папки build/allure-results
+        aspectjWeaver.set(true)  // обработка аннотации @Step (когда делали вебстепы)
+        frameworks {
+            junit5 {  // фреймворк
+                adapterVersion.set("2.27.0")  // версия интеграции фреймворка и алюра, версия Allure JUnit5 (https://github.com/allure-framework/allure-java)
+            }
+        }
+    }
+}
+
+dependencies {
+    testImplementation(
+            "io.rest-assured:rest-assured:5.3.2",
+            "com.codeborne:selenide:6.19.1",
+            "org.junit.jupiter:junit-jupiter:5.10.0",
+            'org.slf4j:slf4j-simple:2.0.7',
+            'com.github.javafaker:javafaker:1.0.2',
+            'io.qameta.allure:allure-selenide:2.27.0'
+    )
+}
+
+tasks.withType(Test) {
+    systemProperties(System.getProperties())
+    useJUnitPlatform()
+
+    testLogging {
+        lifecycle {
+            events "started", "skipped", "failed", "standard_error", "standard_out"
+            exceptionFormat "short"
+        }
+    }
+}
+
+task registration_tests(type: Test) {
+    useJUnitPlatform {
+        includeTags("registration")
+    }
+}
+
+task smoke_tests(type: Test) {
+    useJUnitPlatform {
+        includeTags("smoke")
+    }
+}
+
+task negative_tests(type: Test) {
+    useJUnitPlatform {
+        includeTags("negative")
+    }
+}
